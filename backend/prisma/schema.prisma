@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Video {
+  id           String   @id
+  title        String
+  thumbnail_url String
+  created_at   DateTime
+  duration     Int
+  views        Int
+  tags         Tag[]
+}
+
+model Tag {
+  id      String  @id @default(uuid())
+  name    String  @unique
+  videos  Video[]
+}
