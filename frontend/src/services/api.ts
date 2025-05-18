@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Video } from '../types';
+import type { Video, VideoQueryParams, PaginatedResponse } from '../types';
 
 // Define the base URL for API requests
 const API_URL = 'http://localhost:3001/api';
@@ -12,9 +12,23 @@ const api = axios.create({
   },
 });
 
-// API functions
-export const getVideos = async (): Promise<Video[]> => {
-  const response = await api.get<Video[]>('/videos');
+// // API functions
+// export const getVideos = async (): Promise<Video[]> => {
+//   const response = await api.get<Video[]>('/videos');
+//   return response.data;
+// };
+
+export const getVideos = async (params: VideoQueryParams = {}): Promise<PaginatedResponse<Video>> => {
+  const { page, pageSize, search, tag } = params;
+  
+  // Build query string
+  const queryParams = new URLSearchParams();
+  if (page) queryParams.append('page', page.toString());
+  if (pageSize) queryParams.append('pageSize', pageSize.toString());
+  if (search) queryParams.append('search', search);
+  if (tag) queryParams.append('tag', tag);
+  
+  const response = await api.get<PaginatedResponse<Video>>(`/videos?${queryParams.toString()}`);
   return response.data;
 };
 

@@ -19,9 +19,9 @@ const AppLayout: React.FC = () => {
           </Title>
         </div>
         <Menu 
-          theme="dark" 
-          mode="horizontal" 
-          selectedKeys={[location.pathname]} 
+          theme="dark"
+          mode="horizontal"
+          selectedKeys={[location.pathname]}
           style={{ marginLeft: '32px', flex: 1 }}
         >
           <Menu.Item key="/" icon={<HomeOutlined />}>

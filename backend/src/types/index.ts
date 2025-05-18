@@ -12,6 +12,21 @@ export interface VideoImport {
   videos: VideoDTO[];
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface VideoQueryParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  tag?: string;
+}
+
 export interface PrismaTag {
   id: string;
   name: string;

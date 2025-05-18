@@ -2,10 +2,31 @@ import express from 'express';
 import * as videoService from '../services/videoService';
 import { VideoDTO } from '../types';
 
+
 export const getAllVideos = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   try {
-    const videos = await videoService.getAllVideos();
-    res.json(videos);
+    // Extract query parameters
+    const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : undefined;
+    const search = req.query.search as string | undefined;
+    const tag = req.query.tag as string | undefined;
+    
+    // Get videos with pagination and filtering
+    const result = await videoService.getAllVideos({
+      page,
+      pageSize,
+      search,
+      tag
+    });
+    
+    // Return the paginated response
+    res.json({
+      data: result.videos,
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages
+    });
   } catch (error) {
     console.error('Error getting videos:', error);
     res.status(500).json({ error: 'Failed to get videos' });
@@ -16,6 +37,8 @@ export const getVideoById = async (req: express.Request, res: express.Response, 
   try {
     const { id } = req.params;
     const video = await videoService.getVideoById(id);
+
+    console.log("in getVideoById");
     
     if (!video) {
       res.status(404).json({ error: 'Video not found' });

@@ -1,17 +1,60 @@
 import { PrismaClient } from '../generated/prisma';
-import type { VideoDTO, PrismaVideo, PrismaTag } from '../types';
+import type { VideoDTO, PrismaVideo, PrismaTag, VideoQueryParams } from '../types';
 
 const prisma = new PrismaClient();
 
 
-export const getAllVideos = async (): Promise<VideoDTO[]> => {
+export const getAllVideos = async (params: VideoQueryParams = {}): Promise<{
+  videos: VideoDTO[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> => {
+  const { 
+    page = 1, 
+    pageSize = 12, 
+    search = '', 
+    tag = '' 
+  } = params;
+  
+  // Build the where clause for filtering
+  const where: any = {};
+
+  console.log("In search page: ", page, " pageSize: ", pageSize, " search: ", search, " tag: ", tag)
+  
+  if (search) {
+    where.title = {
+      contains: search,
+    };
+  }
+  
+  if (tag) {
+    where.tags = {
+      some: {
+        name: tag
+      }
+    };
+  }
+  
+  // Get total count for pagination
+  const total = await prisma.video.count({ where });
+  
+  // Get paginated results
   const videos = await prisma.video.findMany({
+    where,
     include: {
       tags: true,
     },
-  });
+    orderBy: {
+      created_at: 'desc' // Most recent videos first
+    },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  }) as PrismaVideo[];
   
-  return videos.map((video: PrismaVideo) => ({
+  // Transform data for the frontend
+  const transformedVideos = videos.map((video: PrismaVideo) => ({
     id: video.id,
     title: video.title,
     thumbnail_url: video.thumbnail_url,
@@ -20,6 +63,14 @@ export const getAllVideos = async (): Promise<VideoDTO[]> => {
     views: video.views,
     tags: video.tags.map((tag: PrismaTag) => tag.name),
   }));
+  
+  return {
+    videos: transformedVideos,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize)
+  };
 };
 
 export const getVideoById = async (id: string): Promise<VideoDTO | null> => {

@@ -13,7 +13,6 @@ const App: React.FC = () => {
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="videos/:id" element={<VideoDetail />} />
-            {/* Add more routes as needed */}
           </Route>
         </Routes>
       </Router>
