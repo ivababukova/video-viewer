@@ -3,20 +3,33 @@ import * as videoService from '../services/videoService';
 import { VideoDTO } from '../types';
 
 
+// videoController.ts (backend)
 export const getAllVideos = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   try {
     // Extract query parameters
     const page = req.query.page ? parseInt(req.query.page as string) : undefined;
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : undefined;
     const search = req.query.search as string | undefined;
-    const tag = req.query.tag as string | undefined;
+    const tags = Array.isArray(req.query.tags) 
+      ? req.query.tags as string[] 
+      : req.query.tags 
+        ? [req.query.tags as string] 
+        : undefined;
+    const tagFilterMode = (req.query.tagFilterMode as 'AND' | 'OR' | undefined) || 'OR';
+    const startDate = req.query.startDate as string | undefined;
+    const endDate = req.query.endDate as string | undefined;
+    const sortBy = req.query.sortBy as string | undefined;
     
-    // Get videos with pagination and filtering
+    // Get videos with pagination, filtering and sorting
     const result = await videoService.getAllVideos({
       page,
       pageSize,
       search,
-      tag
+      tags,
+      tagFilterMode,
+      startDate,
+      endDate,
+      sortBy
     });
     
     // Return the paginated response

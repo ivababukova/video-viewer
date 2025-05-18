@@ -24,7 +24,11 @@ export interface VideoQueryParams {
   page?: number;
   pageSize?: number;
   search?: string;
-  tag?: string;
+  tags?: string[];
+  tagFilterMode?: 'AND' | 'OR';
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
 }
 
 export interface PrismaTag {

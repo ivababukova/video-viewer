@@ -8,11 +8,17 @@ export interface Video {
   tags: string[];
 }
 
+export type TagFilterMode = 'OR' | 'AND';
+
 export interface VideoQueryParams {
   page?: number;
   pageSize?: number;
   search?: string;
-  tag?: string;
+  tags?: string[];
+  tagFilterMode?: TagFilterMode;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: SortOption;
 }
 
 export interface PaginatedResponse<T> {
@@ -21,4 +27,22 @@ export interface PaginatedResponse<T> {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+export type SortOption = 
+  | 'newest' 
+  | 'oldest' 
+  | 'title_asc' 
+  | 'title_desc' 
+  | 'most_viewed'
+  | 'longest';
+
+export interface VideoQueryParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  tags?: string[];
+  startDate?: string;
+  endDate?: string;
+  sortBy?: SortOption;
 }

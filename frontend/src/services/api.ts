@@ -12,22 +12,36 @@ const api = axios.create({
   },
 });
 
-// // API functions
-// export const getVideos = async (): Promise<Video[]> => {
-//   const response = await api.get<Video[]>('/videos');
-//   return response.data;
-// };
 
 export const getVideos = async (params: VideoQueryParams = {}): Promise<PaginatedResponse<Video>> => {
-  const { page, pageSize, search, tag } = params;
+  const { 
+    page, 
+    pageSize, 
+    search, 
+    tags, 
+    tagFilterMode,
+    startDate, 
+    endDate, 
+    sortBy 
+  } = params;
   
   // Build query string
   const queryParams = new URLSearchParams();
   if (page) queryParams.append('page', page.toString());
   if (pageSize) queryParams.append('pageSize', pageSize.toString());
   if (search) queryParams.append('search', search);
-  if (tag) queryParams.append('tag', tag);
+  if (sortBy) queryParams.append('sortBy', sortBy);
   
+  // Handle array of tags
+  if (tags && tags.length > 0) {
+    tags.forEach(tag => queryParams.append('tags', tag));
+  }
+
+  if (tagFilterMode) queryParams.append('tagFilterMode', tagFilterMode);
+
+  if (startDate) queryParams.append('startDate', startDate);
+  if (endDate) queryParams.append('endDate', endDate);
+
   const response = await api.get<PaginatedResponse<Video>>(`/videos?${queryParams.toString()}`);
   return response.data;
 };

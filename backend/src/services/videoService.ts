@@ -4,6 +4,7 @@ import type { VideoDTO, PrismaVideo, PrismaTag, VideoQueryParams } from '../type
 const prisma = new PrismaClient();
 
 
+// videoService.ts (backend)
 export const getAllVideos = async (params: VideoQueryParams = {}): Promise<{
   videos: VideoDTO[];
   total: number;
@@ -15,26 +16,77 @@ export const getAllVideos = async (params: VideoQueryParams = {}): Promise<{
     page = 1, 
     pageSize = 12, 
     search = '', 
-    tag = '' 
+    tags = [],
+    tagFilterMode,
+    startDate,
+    endDate,
+    sortBy = 'newest'
   } = params;
   
   // Build the where clause for filtering
   const where: any = {};
-
-  console.log("In search page: ", page, " pageSize: ", pageSize, " search: ", search, " tag: ", tag)
   
+  // Search filter
   if (search) {
     where.title = {
       contains: search,
     };
   }
+
+
+  console.log("***** tag filtering mode: ", tagFilterMode);
   
-  if (tag) {
-    where.tags = {
-      some: {
-        name: tag
-      }
+  // Tags filter (multiple tags support)
+  if (tags.length > 0) {
+    if (tagFilterMode === 'AND') {
+      // AND logic - videos must have ALL the selected tags
+      where.AND = tags.map(tag => ({
+        tags: {
+          some: {
+            name: tag
+          }
+        }
+      }));
+    } else {
+      // OR logic - videos must have ANY of the selected tags
+      where.tags = {
+        some: {
+          name: {
+            in: tags
+          }
+        }
+      };
+    }
+  }
+  
+  // Date range filter
+  if (startDate && endDate) {
+    where.created_at = {
+      gte: new Date(startDate),
+      lte: new Date(endDate)
     };
+  }
+  
+  let orderBy: any = { created_at: 'desc' }; // default newest first
+  
+  switch(sortBy) {
+    case 'oldest':
+      orderBy = { created_at: 'asc' };
+      break;
+    case 'title_asc':
+      orderBy = { title: 'asc' };
+      break;
+    case 'title_desc':
+      orderBy = { title: 'desc' };
+      break;
+    case 'most_viewed':
+      orderBy = { views: 'desc' };
+      break;
+    case 'longest':
+      orderBy = { duration: 'desc' };
+      break;
+    default:
+      orderBy = { created_at: 'desc' };
   }
   
   // Get total count for pagination
@@ -46,9 +98,7 @@ export const getAllVideos = async (params: VideoQueryParams = {}): Promise<{
     include: {
       tags: true,
     },
-    orderBy: {
-      created_at: 'desc' // Most recent videos first
-    },
+    orderBy,
     skip: (page - 1) * pageSize,
     take: pageSize,
   }) as PrismaVideo[];
