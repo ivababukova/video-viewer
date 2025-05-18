@@ -44,7 +44,7 @@ npm run db:push
 npm run db:generate
 
 # Seed the database with data
-npm run prisma-seed   # or npm run seed if you've set up this script
+npm run seed   # or npm run seed if you've set up this script
 ```
 
 
