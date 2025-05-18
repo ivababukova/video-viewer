@@ -3,12 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Typography, 
   Card, 
-  Descriptions, 
   Tag, 
   Button, 
   Spin, 
   Alert, 
-  Modal, 
   Space, 
   Row, 
   Col 
@@ -17,16 +15,13 @@ import {
   ClockCircleOutlined, 
   EyeOutlined, 
   CalendarOutlined,
-  DeleteOutlined, 
-  EditOutlined,
   ArrowLeftOutlined
 } from '@ant-design/icons';
-import { getVideo, deleteVideo } from '../services/api';
+import { getVideo } from '../services/api';
 import { formatDuration, formatViews, formatDate } from '../utils/formatters';
 import type { Video } from '../types';
 
 const { Title, Text } = Typography;
-const { confirm } = Modal;
 
 const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,27 +47,6 @@ const VideoDetail: React.FC = () => {
 
     fetchVideo();
   }, [id]);
-
-  const handleDelete = () => {
-    if (!video || !id) return;
-    
-    confirm({
-      title: 'Are you sure you want to delete this video?',
-      content: 'This action cannot be undone.',
-      okText: 'Yes, delete it',
-      okType: 'danger',
-      cancelText: 'Cancel',
-      onOk: async () => {
-        try {
-          await deleteVideo(id);
-          navigate('/');
-        } catch (err) {
-          setError('Failed to delete video. Please try again later.');
-          console.error('Error deleting video:', err);
-        }
-      },
-    });
-  };
 
   if (loading) {
     return (
@@ -154,23 +128,6 @@ const VideoDetail: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
-              <Space>
-                <Button 
-                  type="primary" 
-                  icon={<EditOutlined />}
-                  onClick={() => navigate(`/videos/${id}/edit`)}
-                >
-                  Edit
-                </Button>
-                <Button 
-                  danger 
-                  icon={<DeleteOutlined />}
-                  onClick={handleDelete}
-                >
-                  Delete
-                </Button>
-              </Space>
             </Space>
           </Col>
         </Row>

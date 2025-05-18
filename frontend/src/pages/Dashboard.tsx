@@ -5,45 +5,26 @@ import {
   Typography, 
   Input, 
   Select, 
-  Spin, 
-  Empty, 
   Alert, 
-  Pagination,
   Card,
-  DatePicker,
-  Space,
   Button,
-  Drawer,
-  Radio,
   Divider,
-  Tag,
-  Tooltip,
-  Switch,
-  Segmented
 } from 'antd';
 import { 
   SearchOutlined, 
   FilterOutlined, 
   SortAscendingOutlined, 
-  CalendarOutlined,
-  TagsOutlined,
-  ClearOutlined,
-  DownOutlined,
-  MenuOutlined,
-  SortDescendingOutlined,
-  ClockCircleOutlined,
-  LinkOutlined,
-  DisconnectOutlined
 } from '@ant-design/icons';
 import { getVideos } from '../services/api';
-import VideoCard from '../components/VideoCard';
 import type { Video, SortOption, VideoQueryParams, TagFilterMode } from '../types';
 import type { RadioChangeEvent } from 'antd';
+import FilterDrawer from '../components/FilterDrawer';
+import AppliedFilters from '../components/AppliedFilters';
+import VideoGrid from '../components/VideoGrid';
 import dayjs from 'dayjs';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 const Dashboard: React.FC = () => {
   // Video data state
@@ -167,9 +148,7 @@ const Dashboard: React.FC = () => {
     setCurrentPage(1);
   };
   
-  const handleTagFilterModeChange = (value: TagFilterMode) => {
-    console.log("***** tag filter mode: ", value, selectedTags);
-    
+  const handleTagFilterModeChange = (value: TagFilterMode) => {    
     setTagFilterMode(value);
     setCurrentPage(1);
   };
@@ -196,52 +175,19 @@ const Dashboard: React.FC = () => {
     setSortBy('newest');
     setCurrentPage(1);
   };
-  
-  // Render filter badges/tags for active filters
-  const renderActiveFilterTags = () => {
-    if (activeFilters === 0) return null;
-    
-    return (
-      <Space wrap style={{ marginBottom: 16 }}>
-        <Text strong>Active filters:</Text>
-        
-        {selectedTags.length > 0 && (
-          <Tag color="blue" closable onClose={() => setSelectedTags([])}>
-            <TagsOutlined /> {tagFilterMode === 'AND' ? 'An' : 'Any Tag'}: {selectedTags.length}
-          </Tag>
-        )}
-        
-        {dateRange && dateRange[0] && dateRange[1] && (
-          <Tooltip title={`From ${dateRange[0].format('MMM D, YYYY')} to ${dateRange[1].format('MMM D, YYYY')}`}>
-            <Tag color="blue" closable onClose={() => setDateRange(null)}>
-              <CalendarOutlined /> Date Range
-            </Tag>
-          </Tooltip>
-        )}
-        
-        {sortBy !== 'newest' && (
-          <Tooltip title={`Sorted by: ${getSortTitle(sortBy)}`}>
-            <Tag color="blue" closable onClose={() => setSortBy('newest')}>
-              <SortAscendingOutlined /> {getSortTitle(sortBy)}
-            </Tag>
-          </Tooltip>
-        )}
-        
-        {activeFilters > 0 && (
-          <Button 
-            size="small" 
-            icon={<ClearOutlined />} 
-            onClick={handleClearFilters}
-          >
-            Clear All
-          </Button>
-        )}
-      </Space>
-    );
-  };
 
+  const handleClearTags = () => {
+    setSelectedTags([]);
+  }
   
-  // Helper function to get sort option display name
+  const handleClearDateRange = () => {
+    setDateRange(null);
+  }
+  
+  const handleClearSort = () => {
+    setSortBy('newest');
+  }
+  
   const getSortTitle = (sort: SortOption): string => {
     switch (sort) {
       case 'newest': return 'Newest First';
@@ -265,47 +211,6 @@ const Dashboard: React.FC = () => {
       />
     );
   }
-
-  const renderTagDropdownHeader = () => {
-    // This will be rendered in the dropdown
-    return (
-      <div style={{ 
-        padding: '8px 12px', 
-        borderBottom: '1px solid #f0f0f0',
-        position: 'sticky',
-        top: 0,
-        background: 'white',
-        zIndex: 10
-      }}>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Text strong>Match type:</Text>
-          <Segmented
-            options={[
-              {
-                value: 'OR',
-                icon: <DisconnectOutlined />,
-                label: 'Any Tag',
-              },
-              {
-                value: 'AND',
-                icon: <LinkOutlined />,
-                label: 'All Tags',
-              },
-            ]}
-            value={tagFilterMode}
-            onChange={(value) => handleTagFilterModeChange(value as TagFilterMode)}
-            block
-            size="small"
-          />
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            {tagFilterMode === 'AND' 
-              ? 'Videos must have ALL selected tags' 
-              : 'Videos can have ANY of the selected tags'}
-          </Text>
-        </Space>
-      </div>
-    );
-  };
 
   return (
     <div style={{ padding: '24px' }}>
@@ -331,7 +236,6 @@ const Dashboard: React.FC = () => {
               onChange={(value) => setSortBy(value)}
               style={{ width: 150 }}
               suffixIcon={<SortAscendingOutlined />}
-              dropdownMatchSelectWidth={false}
             >
               <Option value="newest">Newest First</Option>
               <Option value="oldest">Oldest First</Option>
@@ -354,148 +258,45 @@ const Dashboard: React.FC = () => {
           size="large"
           style={{ marginBottom: 16 }}
         />
-        
-        {renderActiveFilterTags()}
-        
-        {/* Videos Grid with Loading Indicator */}
-        {loading ? (
-          <div style={{ textAlign: 'center', margin: '60px 0' }}>
-            <Spin size="large" tip="Loading videos..." />
-          </div>
-        ) : videos.length === 0 ? (
-          <Empty 
-            description={
-              <span>
-                No videos found. Try adjusting your search or filters.
-                <br />
-                <Button type="link" onClick={handleClearFilters}>
-                  Clear all filters
-                </Button>
-              </span>
-            } 
-            style={{ margin: '60px 0' }}
-          />
-        ) : (
-          <>
-            <Row gutter={[16, 24]}>
-              {videos.map(video => (
-                <Col 
-                  key={video.id} 
-                  xs={24} 
-                  sm={12} 
-                  md={8} 
-                  lg={6} 
-                >
-                  <VideoCard video={video} />
-                </Col>
-              ))}
-            </Row>
-            
-            <Row justify="center" style={{ marginTop: 32 }}>
-              <Pagination
-                current={currentPage}
-                pageSize={pageSize}
-                total={total}
-                onChange={handlePageChange}
-                showSizeChanger
-                pageSizeOptions={['12', '24', '36', '48']}
-                showTotal={(total) => `Total ${total} videos`}
-              />
-            </Row>
-          </>
-        )}
+
+        <AppliedFilters
+          selectedTags={selectedTags}
+          tagFilterMode={tagFilterMode}
+          dateRange={dateRange}
+          sortBy={sortBy}
+          onClearTags={handleClearTags}
+          onClearDateRange={handleClearDateRange}
+          onClearSort={handleClearSort}
+          onClearAll={handleClearFilters}
+          getSortTitle={getSortTitle}
+        />
+
+        <VideoGrid
+          videos={videos}
+          loading={loading}
+          total={total}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onClearFilters={handleClearFilters}
+        />
       </Card>
       
-      {/* Filters Drawer */}
-      <Drawer
-        title="Filter Videos"
-        placement="right"
-        onClose={() => setFilterDrawerOpen(false)}
+      <FilterDrawer
         open={filterDrawerOpen}
-        width={320}
-        extra={
-          <Button 
-            type="text" 
-            icon={<ClearOutlined />} 
-            onClick={handleClearFilters}
-            disabled={activeFilters === 0}
-          >
-            Clear
-          </Button>
-        }
-        footer={
-          <div style={{ textAlign: 'right' }}>
-            <Button onClick={() => setFilterDrawerOpen(false)} type="primary">
-              Apply Filters
-            </Button>
-          </div>
-        }
-      >
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>
-            <TagsOutlined /> Tags
-          </Title>
-          <Select
-            mode="multiple"
-            allowClear
-            style={{ width: '100%', marginBottom: 8 }}
-            placeholder="Select tags"
-            value={selectedTags}
-            onChange={handleTagsChange}
-            maxTagCount="responsive"
-            popupRender={(menu) => (
-              <>
-                {renderTagDropdownHeader()}
-                {menu}
-              </>
-            )}
-          >
-            {tags.map(tag => (
-              <Option key={tag} value={tag}>{tag}</Option>
-            ))}
-          </Select>
-        </div>
-        
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>
-            <CalendarOutlined /> Date Range
-          </Title>
-          <RangePicker 
-            style={{ width: '100%' }} 
-            onChange={handleDateRangeChange}
-            value={dateRange}
-            allowClear
-          />
-        </div>
-        
-        <div>
-          <Title level={5}>
-            <SortAscendingOutlined /> Sort By
-          </Title>
-          <Radio.Group onChange={handleSortChange} value={sortBy}>
-            <Space direction="vertical">
-              <Radio value="newest">
-                <SortDescendingOutlined /> Newest First
-              </Radio>
-              <Radio value="oldest">
-                <SortAscendingOutlined /> Oldest First
-              </Radio>
-              <Radio value="title_asc">
-                <SortAscendingOutlined /> Title (A-Z)
-              </Radio>
-              <Radio value="title_desc">
-                <SortDescendingOutlined /> Title (Z-A)
-              </Radio>
-              <Radio value="most_viewed">
-                <MenuOutlined /> Most Viewed
-              </Radio>
-              <Radio value="longest">
-                <ClockCircleOutlined /> Longest Duration
-              </Radio>
-            </Space>
-          </Radio.Group>
-        </div>
-      </Drawer>
+        onClose={() => setFilterDrawerOpen(false)}
+        tags={tags}
+        selectedTags={selectedTags}
+        tagFilterMode={tagFilterMode}
+        dateRange={dateRange}
+        sortBy={sortBy}
+        activeFilters={activeFilters}
+        onTagsChange={handleTagsChange}
+        onTagFilterModeChange={handleTagFilterModeChange}
+        onDateRangeChange={handleDateRangeChange}
+        onSortChange={handleSortChange}
+        onClearFilters={handleClearFilters}
+      />
     </div>
   );
 };
