@@ -1,13 +1,14 @@
 import React from 'react';
 import { Space, Typography, Tag, Button, Tooltip } from 'antd';
-import { 
-  TagsOutlined, 
-  CalendarOutlined, 
+import {
+  TagsOutlined,
+  CalendarOutlined,
   SortAscendingOutlined,
   ClearOutlined
 } from '@ant-design/icons';
 import type { TagFilterMode, SortOption } from '../types';
 import dayjs from 'dayjs';
+import { sortByOptions } from '../utils/formatters';
 
 const { Text } = Typography;
 
@@ -20,7 +21,6 @@ interface AppliedFiltersProps {
   onClearDateRange: () => void;
   onClearSort: () => void;
   onClearAll: () => void;
-  getSortTitle: (sort: SortOption) => string;
 }
 
 const AppliedFilters: React.FC<AppliedFiltersProps> = ({
@@ -32,7 +32,6 @@ const AppliedFilters: React.FC<AppliedFiltersProps> = ({
   onClearDateRange,
   onClearSort,
   onClearAll,
-  getSortTitle
 }) => {
   // Calculate active filters count
   const activeFilters = [
@@ -46,13 +45,13 @@ const AppliedFilters: React.FC<AppliedFiltersProps> = ({
   return (
     <Space wrap style={{ marginBottom: 16 }}>
       <Text strong>Active filters:</Text>
-      
+
       {selectedTags.length > 0 && (
         <Tag color="blue" closable onClose={onClearTags}>
           <TagsOutlined /> {tagFilterMode === 'AND' ? 'All' : 'Any'} Tags: {selectedTags.length}
         </Tag>
       )}
-      
+
       {dateRange && dateRange[0] && dateRange[1] && (
         <Tooltip title={`From ${dateRange[0].format('MMM D, YYYY')} to ${dateRange[1].format('MMM D, YYYY')}`}>
           <Tag color="blue" closable onClose={onClearDateRange}>
@@ -60,19 +59,19 @@ const AppliedFilters: React.FC<AppliedFiltersProps> = ({
           </Tag>
         </Tooltip>
       )}
-      
+
       {sortBy !== 'newest' && (
-        <Tooltip title={`Sorted by: ${getSortTitle(sortBy)}`}>
+        <Tooltip title={`Sorted by: ${sortByOptions[sortBy]}`}>
           <Tag color="blue" closable onClose={onClearSort}>
-            <SortAscendingOutlined /> {getSortTitle(sortBy)}
+            <SortAscendingOutlined /> {sortByOptions[sortBy]}
           </Tag>
         </Tooltip>
       )}
-      
+
       {activeFilters > 0 && (
-        <Button 
-          size="small" 
-          icon={<ClearOutlined />} 
+        <Button
+          size="small"
+          icon={<ClearOutlined />}
           onClick={onClearAll}
         >
           Clear All

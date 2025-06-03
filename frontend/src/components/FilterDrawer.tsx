@@ -2,8 +2,8 @@
 
 // src/components/FilterDrawer.tsx
 import React from 'react';
-import { 
-  SortAscendingOutlined, 
+import {
+  SortAscendingOutlined,
   CalendarOutlined,
   TagsOutlined,
   ClearOutlined,
@@ -18,6 +18,7 @@ import type { RadioChangeEvent } from 'antd';
 
 import type { SortOption, TagFilterMode } from '../types';
 import dayjs from 'dayjs';
+import { sortByOptions } from '../utils/formatters';
 
 
 const { RangePicker } = DatePicker;
@@ -60,8 +61,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   const renderTagDropdownHeader = () => {
     // This will be rendered in the dropdown
     return (
-      <div style={{ 
-        padding: '8px 12px', 
+      <div style={{
+        padding: '8px 12px',
         borderBottom: '1px solid #f0f0f0',
         position: 'sticky',
         top: 0,
@@ -89,8 +90,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             size="small"
           />
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {tagFilterMode === 'AND' 
-              ? 'Videos must have ALL selected tags' 
+            {tagFilterMode === 'AND'
+              ? 'Videos must have ALL selected tags'
               : 'Videos can have ANY of the selected tags'}
           </Text>
         </Space>
@@ -106,9 +107,9 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
       open={open}
       width={320}
       extra={
-        <Button 
-          type="text" 
-          icon={<ClearOutlined />} 
+        <Button
+          type="text"
+          icon={<ClearOutlined />}
           onClick={onClearFilters}
           disabled={activeFilters === 0}
         >
@@ -123,70 +124,59 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
         </div>
       }
     >
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>
-            <TagsOutlined /> Tags
-          </Title>
-          <Select
-            mode="multiple"
-            allowClear
-            style={{ width: '100%', marginBottom: 8 }}
-            placeholder="Select tags"
-            value={selectedTags}
-            onChange={onTagsChange}
-            maxTagCount="responsive"
-            popupRender={(menu) => (
-              <>
-                {renderTagDropdownHeader()}
-                {menu}
-              </>
-            )}
-          >
-            {tags.map(tag => (
-              <Option key={tag} value={tag}>{tag}</Option>
-            ))}
-          </Select>
-        </div>
-        
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>
-            <CalendarOutlined /> Date Range
-          </Title>
-          <RangePicker 
-            style={{ width: '100%' }} 
-            onChange={onDateRangeChange}
-            value={dateRange}
-            allowClear
-          />
-        </div>
-        
-        <div>
-          <Title level={5}>
-            <SortAscendingOutlined /> Sort By
-          </Title>
-          <Radio.Group onChange={onSortChange} value={sortBy}>
-            <Space direction="vertical">
-              <Radio value="newest">
-                <SortDescendingOutlined /> Newest First
-              </Radio>
-              <Radio value="oldest">
-                <SortAscendingOutlined /> Oldest First
-              </Radio>
-              <Radio value="title_asc">
-                <SortAscendingOutlined /> Title (A-Z)
-              </Radio>
-              <Radio value="title_desc">
-                <SortDescendingOutlined /> Title (Z-A)
-              </Radio>
-              <Radio value="most_viewed">
-                <MenuOutlined /> Most Viewed
-              </Radio>
-              <Radio value="longest">
-                <ClockCircleOutlined /> Longest Duration
-              </Radio>
-            </Space>
-          </Radio.Group>
-        </div>
+      <div style={{ marginBottom: 24 }}>
+        <Title level={5}>
+          <TagsOutlined /> Tags
+        </Title>
+        <Select
+          mode="multiple"
+          allowClear
+          style={{ width: '100%', marginBottom: 8 }}
+          placeholder="Select tags"
+          value={selectedTags}
+          onChange={onTagsChange}
+          maxTagCount="responsive"
+          popupRender={(menu) => (
+            <>
+              {renderTagDropdownHeader()}
+              {menu}
+            </>
+          )}
+        >
+          {tags.map(tag => (
+            <Option key={tag} value={tag}>{tag}</Option>
+          ))}
+        </Select>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <Title level={5}>
+          <CalendarOutlined /> Date Range
+        </Title>
+        <RangePicker
+          style={{ width: '100%' }}
+          onChange={onDateRangeChange}
+          value={dateRange}
+          allowClear
+        />
+      </div>
+
+      <div>
+        <Title level={5}>
+          <SortAscendingOutlined /> Sort By
+        </Title>
+        <Radio.Group onChange={onSortChange} value={sortBy}>
+          <Space direction="vertical">
+            {
+              Object.entries(sortByOptions).map(([value, label]) => (
+                <Radio value={value}>
+                  <SortDescendingOutlined /> {label}
+                </Radio>
+              ))
+            }
+          </Space>
+        </Radio.Group>
+      </div>
     </Drawer>
   );
 };

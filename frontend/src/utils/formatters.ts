@@ -1,3 +1,5 @@
+import type { List } from "lodash";
+
 // Format duration from seconds to MM:SS
 export const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
@@ -24,4 +26,13 @@ export const formatDate = (dateString: string): string => {
     month: 'short', 
     day: 'numeric' 
   });
+};
+
+export const sortByOptions = {
+  newest: 'Newest First',
+  oldest: 'Oldest First',
+  title_asc: 'Title (A-Z)',
+  title_desc: 'Title (Z-A)',
+  most_viewed: 'Most Viewed',
+  longest: 'Longest Duration'
 };

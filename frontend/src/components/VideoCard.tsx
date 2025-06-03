@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, Tag, Typography, Space } from 'antd';
 import { PlayCircleOutlined, EyeOutlined, CalendarOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -19,9 +19,9 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
       hoverable
       cover={
         <div style={{ position: 'relative' }}>
-          <img 
-            alt={video.title} 
-            src={video.thumbnail_url} 
+          <img
+            alt={video.title}
+            src={video.thumbnail_url}
             style={{ width: '100%', height: '160px', objectFit: 'cover' }}
           />
           <div style={{
@@ -45,13 +45,13 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
       <Title level={5} ellipsis={{ rows: 2 }} style={{ marginBottom: '8px' }}>
         {video.title}
       </Title>
-      
+
       <Space direction="vertical" size={4} style={{ marginTop: 'auto' }}>
         <Space>
           <EyeOutlined /> <Text type="secondary">{formatViews(video.views)} views</Text>
           <CalendarOutlined /> <Text type="secondary">{formatDate(video.created_at)}</Text>
         </Space>
-        
+
         <div>
           {video.tags.slice(0, 3).map(tag => (
             <Tag key={tag} color="blue" style={{ marginBottom: '4px' }}>
